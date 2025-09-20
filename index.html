@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stacking Puzzle with Frame</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.js"></script>
+<style>
+  html,body {margin:0;padding:0;background:#222;height:100%;display:flex;justify-content:center;align-items:center;}
+  #gameContainer {width:95%;height:95%;border:0;}
+</style>
+</head>
+<body>
+<div id="gameContainer"></div>
+<script>
+const GAME_TIME = 60;
+
+const config = {
+  type: Phaser.AUTO,
+  parent: 'gameContainer',
+  backgroundColor: '#4174cf',
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 800, height: 1200 },
+  physics: {
+    default: 'matter',
+    matter: { gravity: { y: 1 }, debug: false }
+  },
+  scene: { preload, create, update, resize }
+};
+
+let game = new Phaser.Game(config);
+
+function preload() {
+  // load a frame image (replace URL with your own frame if needed)
+  this.load.image("frame", "frame.png"); // example frame
+ 
+  
+}
+
+function create() {
+  const scene = this;
+  scene.score = 0;
+  scene.timeLeft = GAME_TIME;
+  scene.gameOver = false;
+
+  const w = scene.scale.width;
+  const h = scene.scale.height;
+  const padding = Math.min(w,h) * 0.03; // padding around game container
+
+  // Background frame
+  const frame = scene.add.image(w/2, h/2, 'frame');
+//   alert(JSON.stringify(frame));
+  frame.displayWidth = w;
+  frame.displayHeight = h;
+
+  // Heights for UI
+  const headingHeight = h * 0.1;
+  const paletteHeight = h * 0.15;
+  const playTop = headingHeight + paletteHeight + padding;
+
+  // --- Heading bar ---
+  const headingBG = scene.add.rectangle(w/2, padding + headingHeight/2, w - padding*2, headingHeight, 0x11182a).setOrigin(0.5);
+  const title = scene.add.text(w/2, padding + headingHeight/2, "STACKING PUZZLE",
+      { fontSize: `${headingHeight*0.4}px`, fontFamily: 'Arial', color: '#ffffff' }).setOrigin(0.5);
+
+  const exitBtn = scene.add.text(padding + 10, padding + headingHeight/2, "EXIT",
+      { fontSize: `${headingHeight*0.35}px`, fontFamily: 'Arial', color: '#ff5555' })
+      .setOrigin(0,0.5).setInteractive();
+  exitBtn.on('pointerdown', ()=> window.location.href = 'about:blank');
+
+  const resetBtn = scene.add.text(w - padding - 10, padding + headingHeight/2, "RESET",
+      { fontSize: `${headingHeight*0.35}px`, fontFamily: 'Arial', color: '#55ff55' })
+      .setOrigin(1,0.5).setInteractive();
+  resetBtn.on('pointerdown', ()=> scene.scene.restart());
+
+  // --- Score & Timer ---
+  scene.scoreText = scene.add.text(padding + 10, playTop + 10, "Score: 0",
+      { fontSize: '24px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(0,0);
+  scene.timeText = scene.add.text(w - padding - 10, playTop + 10, "Time: " + GAME_TIME,
+      { fontSize: '24px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(1,0);
+
+  // --- Shape Palette ---
+  scene.blocksGroup = scene.add.group();
+  const paletteGroup = scene.add.group();
+  const sizes = [
+    { w: w*0.15, h: paletteHeight*0.4 },
+    { w: w*0.10, h: paletteHeight*0.5 },
+    { w: w*0.18, h: paletteHeight*0.35 },
+    { w: w*0.12, h: paletteHeight*0.45 },
+    { w: w*0.14, h: paletteHeight*0.4 }
+  ];
+  const totalShapesWidth = sizes.reduce((sum, s) => sum + s.w, 0);
+  const gap = (w - padding*2 - totalShapesWidth) / (sizes.length + 1);
+  let currentX = padding + gap;
+  const centerY = padding + headingHeight + paletteHeight/2;
+  let draggingClone = null;
+
+  sizes.forEach(s => {
+    const x = currentX + s.w/2;
+    const shape = scene.add.rectangle(x, centerY, s.w, s.h, 0x374d9d)
+      .setStrokeStyle(2, 0xffffff)
+      .setInteractive();
+    paletteGroup.add(shape);
+
+    shape.on('pointerdown', pointer => {
+      if (scene.gameOver) return;
+      if (draggingClone) draggingClone.destroy();
+      draggingClone = scene.add.rectangle(pointer.x, pointer.y, s.w, s.h, 0x374d9d)
+        .setStrokeStyle(2,0xffffff);
+    });
+
+    currentX += s.w + gap;
+  });
+
+  // Drag & Drop
+  scene.input.on('pointermove', pointer => {
+    if (draggingClone) draggingClone.setPosition(pointer.x, pointer.y);
+  });
+  scene.input.on('pointerup', pointer => {
+    if (!draggingClone) return;
+    if (pointer.y > playTop + 20 && pointer.y < h - padding - 20) {
+      scene.matter.add.gameObject(draggingClone, { shape:'rectangle', chamfer:4 })
+        .setBounce(0.1)
+        .setFriction(0.3);
+      scene.blocksGroup.add(draggingClone);
+      scene.score++;
+      scene.scoreText.setText("Score: " + scene.score);
+    } else {
+      draggingClone.destroy();
+    }
+    draggingClone = null;
+  });
+
+  // Ground platform
+  const groundY = h - padding - 20;
+  const ground = scene.matter.add.rectangle(w/2, groundY, w*0.75, 40, { isStatic:true, chamfer:4 });
+  scene.add.rectangle(w/2, groundY, w*0.75, 40, 0x11182a);
+
+  // Timer countdown
+  scene.time.addEvent({
+    delay: 1000,
+    loop: true,
+    callback: () => {
+      if (scene.gameOver) return;
+      scene.timeLeft--;
+      scene.timeText.setText("Time: " + scene.timeLeft);
+      if (scene.timeLeft <= 0) {
+        scene.gameOver = true;
+        scene.add.text(w/2, h/2, "GAME OVER",
+          { fontSize: '48px', fontFamily: 'Arial', color: '#ff0000' }).setOrigin(0.5);
+      }
+    }
+  });
+}
+
+function update() {}
+
+function resize(gameSize) {
+  this.cameras.resize(gameSize.width, gameSize.height);
+}
+</script>
+</body>
+</html>
