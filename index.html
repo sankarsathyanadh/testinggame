@@ -66,11 +66,11 @@ function create() {
 const btnSize = 64;
   const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
                   .setDisplaySize(btnSize, btnSize)
-                  .setOrigin(0,0).setInteractive();
+                  .setOrigin(1,1).setInteractive();
 
   const resetBtn = scene.add.image(w - cornerOffset, cornerOffset, 'resetBtn')
                    .setDisplaySize(btnSize, btnSize)
-                   .setOrigin(1,0).setInteractive();
+                   .setOrigin(0,1).setInteractive();
   resetBtn.on('pointerdown', () => scene.scene.restart());
 
   // ----- SCORE & TIMER (bigger text) -----
