@@ -7,8 +7,8 @@
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.js"></script>
 <style>
   html,body {
-    margin:0; padding:0; background:#222;
-    width:100%; height:100%;
+    margin:0; padding:0; background:#00406e;
+    width:100%; height:100dvh;
     display:flex; justify-content:center; align-items:center;
   }
   #gameContainer {width:100%; height:100%;}
@@ -23,7 +23,13 @@ const config = {
   type: Phaser.AUTO,
   parent: 'gameContainer',
   backgroundColor: '#4174cf',
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 800, height: 1200 },
+  // scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 800, height: 1200 },
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+   width: window.innerWidth * window.devicePixelRatio,
+   height: window.innerHeight * window.devicePixelRatio
+  },
   physics: {
     default: 'matter',
     matter: { gravity: { y: 1 }, debug: false }
