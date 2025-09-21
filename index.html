@@ -34,7 +34,7 @@ const config = {
 new Phaser.Game(config);
 
 function preload() {
-  // replace these with your own images
+  // Replace these with your own image assets
    this.load.image('frame', 'frame.png');
   this.load.image('exitBtn', 'ExitButton.png');   // sample exit icon
   this.load.image('resetBtn', 'ResetButton.png');  // sample refresh icon
@@ -51,32 +51,34 @@ function create() {
   const w = scene.scale.width;
   const h = scene.scale.height;
 
-  // ----- FRAME -----
+  // ----- FULL-SCREEN FRAME -----
   const frame = scene.add.image(w/2, h/2, 'frame');
-  frame.setDisplaySize(w, h); // always full screen
+  frame.setDisplaySize(w, h);
 
-  // Add generous padding so UI sits well inside frame
-  const padding = Math.min(w, h) * 0.08;
-
+  // responsive padding for inner game area
+  const pad = Math.min(w, h) * 0.08;
   const paletteHeight = h * 0.15;
-  const uiTop = padding + 10;
-  const playTop = padding + paletteHeight + 40;
+  const playTop = pad + paletteHeight + 60;
 
-  // ----- TOP BUTTONS -----
-  const btnSize = 56;
-  const exitBtn = scene.add.image(padding + btnSize/2, uiTop + btnSize/2, 'exitBtn')
-                  .setDisplaySize(btnSize, btnSize).setInteractive();
+  // ----- EXIT & RESET BUTTONS -----
+  const btnSize = 64;
+  const exitBtn = scene.add.image(pad, pad, 'exitBtn')
+                  .setDisplaySize(btnSize, btnSize)
+                  .setOrigin(0,0).setInteractive();
   exitBtn.on('pointerdown', () => window.location.href = 'about:blank');
 
-  const resetBtn = scene.add.image(w - padding - btnSize/2, uiTop + btnSize/2, 'resetBtn')
-                  .setDisplaySize(btnSize, btnSize).setInteractive();
+  const resetBtn = scene.add.image(w - pad, pad, 'resetBtn')
+                   .setDisplaySize(btnSize, btnSize)
+                   .setOrigin(1,0).setInteractive();
   resetBtn.on('pointerdown', () => scene.scene.restart());
 
-  // ----- SCORE & TIMER -----
-  scene.scoreText = scene.add.text(padding + 10, uiTop + btnSize + 10, 'Score: 0',
-    { fontSize: '26px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(0,0);
-  scene.timeText = scene.add.text(w - padding - 10, uiTop + btnSize + 10, 'Time: ' + GAME_TIME,
-    { fontSize: '26px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(1,0);
+  // ----- SCORE & TIMER (bigger text) -----
+  const fontSize = Math.max(32, w * 0.04);  // responsive size
+  scene.scoreText = scene.add.text(pad, pad + btnSize + 10, 'Score: 0',
+    { fontSize: fontSize + 'px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(0,0);
+
+  scene.timeText = scene.add.text(w - pad, pad + btnSize + 10, 'Time: ' + GAME_TIME,
+    { fontSize: fontSize + 'px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(1,0);
 
   // ----- SHAPE PALETTE -----
   const sizes = [
@@ -86,10 +88,10 @@ function create() {
     { w: w*0.12, h: paletteHeight*0.45 },
     { w: w*0.14, h: paletteHeight*0.4 }
   ];
-  const totalWidth = sizes.reduce((sum, s) => sum + s.w, 0);
-  const gap = (w - 2*padding - totalWidth) / (sizes.length + 1);
-  let xPos = padding + gap;
-  const centerY = uiTop + btnSize + 20 + paletteHeight/2;
+  const totalW = sizes.reduce((sum, s) => sum + s.w, 0);
+  const gap = (w - 2*pad - totalW) / (sizes.length + 1);
+  let xPos = pad + gap;
+  const centerY = pad + btnSize + 20 + paletteHeight/2;
   let dragging = null;
 
   sizes.forEach(s => {
@@ -107,7 +109,7 @@ function create() {
   scene.input.on('pointermove', p => { if (dragging) dragging.setPosition(p.x, p.y); });
   scene.input.on('pointerup', p => {
     if (!dragging) return;
-    if (p.y > playTop && p.y < h - padding) {
+    if (p.y > playTop && p.y < h - pad) {
       scene.matter.add.gameObject(dragging, { shape:'rectangle' })
           .setBounce(0.1).setFriction(0.3);
       scene.score++;
@@ -119,16 +121,17 @@ function create() {
   });
 
   // ----- GROUND -----
-  const groundY = h - padding - 40;
+  const groundY = h - pad - 40;
   scene.matter.add.rectangle(w/2, groundY, w*0.75, 40, { isStatic:true });
   scene.add.rectangle(w/2, groundY, w*0.75, 40, 0x11182a);
 
-  // ----- BOTTOM LOGOS (maintain aspect ratio) -----
-  const logoSize = 70;
-  const logo1 = scene.add.image(padding + logoSize/2, h - padding - logoSize/2, 'logo1');
-  const logo2 = scene.add.image(w - padding - logoSize/2, h - padding - logoSize/2, 'logo2');
+  // ----- BOTTOM LOGOS (aspect preserved) -----
+  const logoSize = 80;
+  const logo1 = scene.add.image(pad, h - pad, 'logo1').setOrigin(0,1);
+  const logo2 = scene.add.image(w - pad, h - pad, 'logo2').setOrigin(1,1);
   [logo1, logo2].forEach(l => {
-    l.setDisplaySize(logoSize, logoSize * (l.height / l.width)); // preserve aspect
+    const ratio = l.height / l.width;
+    l.setDisplaySize(logoSize, logoSize * ratio);
   });
 
   // ----- TIMER -----
@@ -142,7 +145,7 @@ function create() {
       if (scene.timeLeft <= 0) {
         scene.gameOver = true;
         scene.add.text(w/2, h/2, 'GAME OVER',
-          { fontSize: '48px', fontFamily: 'Arial', color: '#ff0000' }).setOrigin(0.5);
+          { fontSize: '56px', fontFamily: 'Arial', color: '#ff0000' }).setOrigin(0.5);
       }
     }
   });
