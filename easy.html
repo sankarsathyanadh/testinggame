@@ -74,7 +74,7 @@ function create() {
   // const playTop = pad + paletteHeight + 60;
 
   // ----- EXIT & RESET BUTTONS -----
-const btnSize = 96;
+const btnSize = 120;
   const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
                   .setDisplaySize(btnSize, btnSize)
                   .setOrigin(0,1).setInteractive();
@@ -142,9 +142,9 @@ const btnSize = 96;
   scene.add.rectangle(w/2, groundY, w*0.75, 40, 0x11182a);
 
   // ----- BOTTOM LOGOS (aspect preserved) -----
-  const logoSize = 120;
-  const logo1 = scene.add.image(pad, h - pad, 'logo1').setOrigin(2,-1);
-  const logo2 = scene.add.image(w - pad, h - pad, 'logo2').setOrigin(-1,-1);
+  const logoSize = 200;
+  const logo1 = scene.add.image(pad, h - pad, 'logo1').setOrigin(1,0);
+  const logo2 = scene.add.image(w - pad, h - pad, 'logo2').setOrigin(0,0);
   [logo1, logo2].forEach(l => {
     const ratio = l.height / l.width;
     l.setDisplaySize(logoSize, logoSize * ratio);
