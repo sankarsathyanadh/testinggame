@@ -43,7 +43,7 @@ function preload() {
 }
 
 function create() {
-  const scene = this;
+ const scene = this;
   scene.score = 0;
   scene.timeLeft = GAME_TIME;
   scene.gameOver = false;
@@ -55,19 +55,20 @@ function create() {
   const frame = scene.add.image(w/2, h/2, 'frame');
   frame.setDisplaySize(w, h);
 
-  // responsive padding for inner game area
-  const pad = Math.min(w, h) * 0.08;
+  // ✅ Increase padding for all HUD elements
+  const pad = Math.min(w, h) * 0.12;   // was 0.08
+  const cornerOffset = pad * 0.6;      // extra inset for corner buttons
+
   const paletteHeight = h * 0.15;
   const playTop = pad + paletteHeight + 60;
 
   // ----- EXIT & RESET BUTTONS -----
-  const btnSize = 64;
-  const exitBtn = scene.add.image(pad, pad, 'exitBtn')
+const btnSize = 64;
+  const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
                   .setDisplaySize(btnSize, btnSize)
                   .setOrigin(0,0).setInteractive();
-  exitBtn.on('pointerdown', () => window.location.href = 'about:blank');
 
-  const resetBtn = scene.add.image(w - pad, pad, 'resetBtn')
+  const resetBtn = scene.add.image(w - cornerOffset, cornerOffset, 'resetBtn')
                    .setDisplaySize(btnSize, btnSize)
                    .setOrigin(1,0).setInteractive();
   resetBtn.on('pointerdown', () => scene.scene.restart());
