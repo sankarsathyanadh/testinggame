@@ -23,13 +23,13 @@ const config = {
   type: Phaser.AUTO,
   parent: 'gameContainer',
   backgroundColor: '#4174cf',
-  // scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 800, height: 1200 },
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-   width: window.innerWidth * window.devicePixelRatio,
-   height: window.innerHeight * window.devicePixelRatio
-  },
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 2180, height: 3840 },
+  // scale: {
+  //   mode: Phaser.Scale.FIT,
+  //   autoCenter: Phaser.Scale.CENTER_BOTH,
+  //  width: window.innerWidth * window.devicePixelRatio,
+  //  height: window.innerHeight * window.devicePixelRatio
+  // },
   physics: {
     default: 'matter',
     matter: { gravity: { y: 1 }, debug: false }
