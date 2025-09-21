@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stacking Puzzle</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.js"></script>
+<style>
+  html,body {
+    margin:0; padding:0; background:#222;
+    width:100%; height:100%;
+    display:flex; justify-content:center; align-items:center;
+  }
+  #gameContainer {width:100%; height:100%;}
+</style>
+</head>
+<body>
+<div id="gameContainer"></div>
+<script>
+const GAME_TIME = 60;
+
+const config = {
+  type: Phaser.AUTO,
+  parent: 'gameContainer',
+  backgroundColor: '#4174cf',
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 800, height: 1200 },
+  physics: {
+    default: 'matter',
+    matter: { gravity: { y: 1 }, debug: false }
+  },
+  scene: { preload, create, update }
+};
+
+new Phaser.Game(config);
+
+function preload() {
+  // Replace these with your own image assets
+   this.load.image('frame', 'frame.png');
+  this.load.image('exitBtn', 'ExitButton.png');   // sample exit icon
+  this.load.image('resetBtn', 'ResetButton.png');  // sample refresh icon
+  this.load.image('logo1', 'QIBLogo.png'); // sample
+  this.load.image('logo2', 'QIBJunior.png'); // sample
+}
+
+function create() {
+ const scene = this;
+  scene.score = 0;
+  scene.timeLeft = GAME_TIME;
+  scene.gameOver = false;
+
+  const w = scene.scale.width;
+  const h = scene.scale.height;
+
+  // ----- FULL-SCREEN FRAME -----
+  const frame = scene.add.image(w/2, h/2, 'frame');
+  frame.setDisplaySize(w, h);
+
+  // ✅ Increase padding for all HUD elements
+  const pad = Math.min(w, h) * 0.12;   // was 0.08
+  const cornerOffset = pad * 0.6;      // extra inset for corner buttons
+
+  const paletteHeight = h * 0.15;
+  const playTop = pad + paletteHeight + 60;
+
+  // ----- EXIT & RESET BUTTONS -----
+const btnSize = 64;
+  const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
+                  .setDisplaySize(btnSize, btnSize)
+                  .setOrigin(0,1).setInteractive();
+                  exitBtn.on('pointerdown', () => {
+    // Replace 'otherpage.html' with your target page
+    window.location.href = 'index.html';
+});
+
+  const resetBtn = scene.add.image(w - cornerOffset, cornerOffset, 'resetBtn')
+                   .setDisplaySize(btnSize, btnSize)
+                   .setOrigin(1,1).setInteractive();
+  resetBtn.on('pointerdown', () => scene.scene.restart());
+
+  // ----- SCORE & TIMER (bigger text) -----
+  const fontSize = Math.max(32, w * 0.04);  // responsive size
+  scene.scoreText = scene.add.text(pad, pad + btnSize + 10, 'Score: 0',
+    { fontSize: fontSize + 'px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(0,0);
+
+  scene.timeText = scene.add.text(w - pad, pad + btnSize + 10, 'Time: ' + GAME_TIME,
+    { fontSize: fontSize + 'px', fontFamily: 'Arial', color: '#ffffff' }).setOrigin(1,0);
+
+  // ----- SHAPE PALETTE -----
+  const sizes = [
+    { w: w*0.15, h: paletteHeight*0.4 },
+    { w: w*0.10, h: paletteHeight*0.5 },
+    { w: w*0.18, h: paletteHeight*0.35 },
+    { w: w*0.12, h: paletteHeight*0.45 },
+    { w: w*0.14, h: paletteHeight*0.4 }
+  ];
+  const totalW = sizes.reduce((sum, s) => sum + s.w, 0);
+  const gap = (w - 2*pad - totalW) / (sizes.length + 1);
+  let xPos = pad + gap;
+  const centerY = pad + btnSize + 20 + paletteHeight/2;
+  let dragging = null;
+
+  sizes.forEach(s => {
+    const rect = scene.add.rectangle(xPos + s.w/2, centerY, s.w, s.h, 0x374d9d)
+                  .setStrokeStyle(2,0xffffff).setInteractive();
+    rect.on('pointerdown', pointer => {
+      if (scene.gameOver) return;
+      if (dragging) dragging.destroy();
+      dragging = scene.add.rectangle(pointer.x, pointer.y, s.w, s.h, 0x374d9d)
+                        .setStrokeStyle(2,0xffffff);
+    });
+    xPos += s.w + gap;
+  });
+
+  scene.input.on('pointermove', p => { if (dragging) dragging.setPosition(p.x, p.y); });
+  scene.input.on('pointerup', p => {
+    if (!dragging) return;
+    if (p.y > playTop && p.y < h - pad) {
+      scene.matter.add.gameObject(dragging, { shape:'rectangle' })
+          .setBounce(0.1).setFriction(0.3);
+      scene.score++;
+      scene.scoreText.setText('Score: ' + scene.score);
+    } else {
+      dragging.destroy();
+    }
+    dragging = null;
+  });
+
+  // ----- GROUND -----
+  const groundY = h - pad - 40;
+  scene.matter.add.rectangle(w/2, groundY, w*0.75, 40, { isStatic:true });
+  scene.add.rectangle(w/2, groundY, w*0.75, 40, 0x11182a);
+
+  // ----- BOTTOM LOGOS (aspect preserved) -----
+  const logoSize = 80;
+  const logo1 = scene.add.image(pad, h - pad, 'logo1').setOrigin(1,0);
+  const logo2 = scene.add.image(w - pad, h - pad, 'logo2').setOrigin(0,0);
+  [logo1, logo2].forEach(l => {
+    const ratio = l.height / l.width;
+    l.setDisplaySize(logoSize, logoSize * ratio);
+  });
+
+  // ----- TIMER -----
+  scene.time.addEvent({
+    delay: 1000,
+    loop: true,
+    callback: () => {
+      if (scene.gameOver) return;
+      scene.timeLeft--;
+      scene.timeText.setText('Time: ' + scene.timeLeft);
+      if (scene.timeLeft <= 0) {
+        scene.gameOver = true;
+        scene.add.text(w/2, h/2, 'GAME OVER',
+          { fontSize: '56px', fontFamily: 'Arial', color: '#ff0000' }).setOrigin(0.5);
+      }
+    }
+  });
+}
+
+function update() {}
+</script>
+</body>
+</html>
