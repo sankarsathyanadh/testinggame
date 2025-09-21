@@ -65,13 +65,16 @@ function create() {
 
   // ✅ Increase padding for all HUD elements
   const pad = Math.min(w, h) * 0.12;   // was 0.08
+   const extraTopPadding = pad + 60; // extra top space
+  const paletteHeight = h * 0.15;
+  const playTop = extraTopPadding + paletteHeight + 40;
   const cornerOffset = pad * 0.6;      // extra inset for corner buttons
 
-  const paletteHeight = h * 0.15;
-  const playTop = pad + paletteHeight + 60;
+  // const paletteHeight = h * 0.15;
+  // const playTop = pad + paletteHeight + 60;
 
   // ----- EXIT & RESET BUTTONS -----
-const btnSize = 64;
+const btnSize = 80;
   const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
                   .setDisplaySize(btnSize, btnSize)
                   .setOrigin(0,1).setInteractive();
@@ -139,7 +142,7 @@ const btnSize = 64;
   scene.add.rectangle(w/2, groundY, w*0.75, 40, 0x11182a);
 
   // ----- BOTTOM LOGOS (aspect preserved) -----
-  const logoSize = 80;
+  const logoSize = 96;
   const logo1 = scene.add.image(pad, h - pad, 'logo1').setOrigin(1,0);
   const logo2 = scene.add.image(w - pad, h - pad, 'logo2').setOrigin(0,0);
   [logo1, logo2].forEach(l => {
