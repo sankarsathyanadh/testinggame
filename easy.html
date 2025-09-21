@@ -65,7 +65,7 @@ function create() {
 
   // ✅ Increase padding for all HUD elements
   const pad = Math.min(w, h) * 0.12;   // was 0.08
-   const extraTopPadding = pad + 60; // extra top space
+   const extraTopPadding = pad + 80; // extra top space
   const paletteHeight = h * 0.15;
   const playTop = extraTopPadding + paletteHeight + 40;
   const cornerOffset = pad * 0.6;      // extra inset for corner buttons
@@ -74,7 +74,7 @@ function create() {
   // const playTop = pad + paletteHeight + 60;
 
   // ----- EXIT & RESET BUTTONS -----
-const btnSize = 80;
+const btnSize = 96;
   const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
                   .setDisplaySize(btnSize, btnSize)
                   .setOrigin(0,1).setInteractive();
@@ -90,7 +90,7 @@ const btnSize = 80;
 
   // ----- SCORE & TIMER (bigger text) -----
   const fontSize = Math.max(32, w * 0.04);  // responsive size
-  scene.scoreText = scene.add.text(pad, pad + btnSize + 10, 'Score: 0',
+  scene.scoreText = scene.add.text(pad, pad + btnSize +  extraTopPadding/2, 'Score: 0',
     { fontSize: fontSize + 'px', fontFamily: 'Play, sans-serif', color: '#ffffff' }).setOrigin(0,0);
 
   scene.timeText = scene.add.text(w - pad, pad + btnSize + 10, 'Time: ' + GAME_TIME,
