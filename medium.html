@@ -5,27 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stacking Puzzle</title>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.js"></script>
-<style>
-   @import url('https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap');
-  * {   font-family: "Play", sans-serif; }
-  html,body {
-    margin:0; padding:0; background:#222;
-    width:100%; height:100%;
-    display:flex; justify-content:center; align-items:center;
-  }
-  #gameContainer {width:100%; height:100%;}
-</style>
+<link rel="stylesheet" href="style.css" >
+
 </head>
 <body>
-<div id="gameContainer"></div>
+<div id="gameContainer">
+    <button class="btn_top_left" onclick="exittoHome()"  > </button>
+  <button class="btn_top_right" id="myBtnRestart"  > </button>
+  <div id="gameContainer_child">
+  
+</div>
+
+</div>
 <script>
+    function exittoHome(){
+  window.location.href = 'index.html';
+  }
 const GAME_TIME = 50;
 
 const config = {
   type: Phaser.AUTO,
-  parent: 'gameContainer',
-  backgroundColor: '#4174cf',
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 2180, height: 3840 },
+  parent: 'gameContainer_child',
+  backgroundColor: '#00406e',
+  // backgroundColor: '#fff',
+  // scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 2180, height: 3840 },
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 841, height: 1552 },
 
   physics: {
     default: 'matter',
@@ -38,7 +42,7 @@ new Phaser.Game(config);
 
 function preload() {
   // Replace these with your own image assets
-   this.load.image('frame', 'frame.svg');
+  //  this.load.image('frame', 'frame.svg');
   this.load.image('exitBtn', 'ExitButton.png');   // sample exit icon
   this.load.image('resetBtn', 'ResetButton.png');  // sample refresh icon
   this.load.image('logo1', 'QIBLogo.png'); // sample
@@ -55,8 +59,8 @@ function create() {
   const h = scene.scale.height;
 
   // ----- FULL-SCREEN FRAME -----
-  const frame = scene.add.image(w/2, h/2, 'frame');
-  frame.setDisplaySize(w, h);
+  // const frame = scene.add.image(w/2, h/2, 'frame');
+  // frame.setDisplaySize(w, h);
 
   // Increase padding for all HUD elements
    const pad = Math.min(w, h) * 0.12;   // was 0.08
@@ -67,18 +71,20 @@ function create() {
 
   // ----- EXIT & RESET BUTTONS -----
 const btnSize = 120;
-  const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
-                  .setDisplaySize(btnSize, btnSize)
-                  .setOrigin(0,1).setInteractive();
-                  exitBtn.on('pointerdown', () => {
-    // Replace 'otherpage.html' with your target page
-    window.location.href = 'index.html';
+ document.getElementById("myBtnRestart").addEventListener("click", () => {
+  scene.scene.restart();
 });
+//   const exitBtn = scene.add.image(cornerOffset, cornerOffset, 'exitBtn')
+//                   .setDisplaySize(btnSize, btnSize)
+//                   .setOrigin(0,1).setInteractive();
+//                   exitBtn.on('pointerdown', () => {
+//     window.location.href = 'index.html';
+// });
 
-  const resetBtn = scene.add.image(w - cornerOffset, cornerOffset, 'resetBtn')
-                   .setDisplaySize(btnSize, btnSize)
-                   .setOrigin(1,1).setInteractive();
-  resetBtn.on('pointerdown', () => scene.scene.restart());
+  // const resetBtn = scene.add.image(w - cornerOffset, cornerOffset, 'resetBtn')
+  //                  .setDisplaySize(btnSize, btnSize)
+  //                  .setOrigin(1,1).setInteractive();
+  // resetBtn.on('pointerdown', () => scene.scene.restart());
 
   // ----- SCORE & TIMER (bigger text) -----
   const fontSize = Math.max(32, w * 0.04);  // responsive size
@@ -103,12 +109,12 @@ const btnSize = 120;
   let dragging = null;
 
   sizes.forEach(s => {
-    const rect = scene.add.rectangle(xPos + s.w/2, centerY, s.w, s.h, 0x374d9d)
+    const rect = scene.add.rectangle(xPos + s.w/2, centerY, s.w, s.h, 0xe5e53c)
                   .setStrokeStyle(2,0xffffff).setInteractive();
     rect.on('pointerdown', pointer => {
       if (scene.gameOver) return;
       if (dragging) dragging.destroy();
-      dragging = scene.add.rectangle(pointer.x, pointer.y, s.w, s.h, 0x374d9d)
+      dragging = scene.add.rectangle(pointer.x, pointer.y, s.w, s.h, 0xe5e53c)
                         .setStrokeStyle(2,0xffffff);
     });
     xPos += s.w + gap;
@@ -134,13 +140,13 @@ const btnSize = 120;
   scene.add.rectangle(w/2, groundY, w*0.60, 40, 0x11182a);
 
   // ----- BOTTOM LOGOS (aspect preserved) -----
-   const logoSize = 280;
-  const logo1 = scene.add.image(pad, h - pad, 'logo1').setOrigin(1,0);
-  const logo2 = scene.add.image(w - pad, h - pad, 'logo2').setOrigin(0,0);
-  [logo1, logo2].forEach(l => {
-    const ratio = l.height / l.width;
-    l.setDisplaySize(logoSize, logoSize * ratio);
-  });
+  //  const logoSize = 280;
+  // const logo1 = scene.add.image(pad, h - pad, 'logo1').setOrigin(1,0);
+  // const logo2 = scene.add.image(w - pad, h - pad, 'logo2').setOrigin(0,0);
+  // [logo1, logo2].forEach(l => {
+  //   const ratio = l.height / l.width;
+  //   l.setDisplaySize(logoSize, logoSize * ratio);
+  // });
 
   // ----- TIMER -----
   scene.time.addEvent({
