@@ -11,7 +11,7 @@
       align-items:center;
   }
    body {
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -70,5 +70,14 @@
         max-height: calc(100% - 256px);
         margin-left: 11px;
         margin-top: 129px;
+    }
+    }
+      @media screen and (max-width: 767px) {
+   
+         #gameContainer_child{
+             /* max-width: calc(100% - 10%); */
+        max-height: calc(100dvh - 19%);
+        /* margin-left: 11px; */
+        margin-top: 17%;
     }
     }
